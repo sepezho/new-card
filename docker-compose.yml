@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  my-static-site:
+    build: .
+    container_name: my-static-site
+    ports:
+      - "8080:80" # Expose the container's port 80 on host port 8080
+
