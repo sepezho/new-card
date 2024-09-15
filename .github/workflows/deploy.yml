@@ -61,4 +61,10 @@ jobs:
             
             # Run the new container
             docker run -d --name my-static-site -p 80:80 ${{ secrets.DOCKER_USERNAME }}/my-static-site:latest
+            
+            # Obtain or renew SSL certificates with Certbot (if needed)
+            sudo certbot --nginx -d ${{ secrets.DOMAIN }} --non-interactive --agree-tos --email ${{ secrets.MAIL }}
+            
+            # Restart Nginx to apply the new certificates
+            sudo systemctl restart nginx
 
