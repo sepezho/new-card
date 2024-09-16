@@ -65,6 +65,7 @@ jobs:
             # Pull the latest Docker image
             docker pull ${{ secrets.DOCKER_USERNAME }}/my-static-site:latest
             
+            sudo lsof -i :80
             # Run the new container
             docker run -d --name my-static-site -p 80:80 ${{ secrets.DOCKER_USERNAME }}/my-static-site:latest
             
