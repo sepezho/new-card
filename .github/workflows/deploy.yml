@@ -61,6 +61,7 @@ jobs:
               docker rm \$(docker ps -q --filter 'publish=80')
             fi
             
+            docker ps 
             # Pull the latest Docker image
             docker pull ${{ secrets.DOCKER_USERNAME }}/my-static-site:latest
             
