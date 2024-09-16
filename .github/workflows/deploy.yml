@@ -49,14 +49,17 @@ jobs:
             # Navigate to the project directory containing the docker-compose.yml file
             cd ${{ secrets.PROJECT_PATH }}
             
-            # Stop and remove existing services using docker-compose
-            docker-compose down
+            # Stop and remove existing container using Docker
+            if [ $(docker ps -aq -f name=my-static-site | wc -l) -gt 0 ]; then
+              docker stop my-static-site
+              docker rm my-static-site
+            fi
             
-            # Pull the latest Docker image (if not using build in compose file)
+            # Pull the latest Docker image
             docker pull ${{ secrets.DOCKER_USERNAME }}/my-static-site:latest
             
-            # Build and start the new containers with docker-compose
-            docker-compose up -d --build
+            # Run the new container
+            docker run -d --name my-static-site -p 80:80 ${{ secrets.DOCKER_USERNAME }}/my-static-site:latest
             
             # Obtain or renew SSL certificates with Certbot (without www)
             sudo certbot --nginx -d ${{ secrets.DOMAIN }} --non-interactive --agree-tos --email ${{ secrets.EMAIL }}
