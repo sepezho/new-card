@@ -49,10 +49,14 @@ jobs:
             # Navigate to the project directory containing the docker-compose.yml file
             cd ${{ secrets.PROJECT_PATH }}
             
-            # Stop and remove existing container using Docker
             if [ $(docker ps -aq -f name=my-static-site | wc -l) -gt 0 ]; then
               docker stop my-static-site
               docker rm my-static-site
+            fi
+            # Identify and stop any existing container using port 80
+            if [ $(docker ps -q --filter "publish=80" | wc -l) -gt 0 ]; then
+              docker stop $(docker ps -q --filter "publish=80")
+              docker rm $(docker ps -q --filter "publish=80")
             fi
             
             # Pull the latest Docker image
