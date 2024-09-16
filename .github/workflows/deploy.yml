@@ -38,7 +38,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/my-static-site:latest
 
-      # Step 5: Deploy to the remote server
+
       - name: Deploy to remote server
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -49,10 +49,12 @@ jobs:
             # Navigate to the project directory containing the docker-compose.yml file
             cd ${{ secrets.PROJECT_PATH }}
             
+            # Stop and remove existing container using Docker
             if [ $(docker ps -aq -f name=my-static-site | wc -l) -gt 0 ]; then
               docker stop my-static-site
               docker rm my-static-site
             fi
+            
             # Identify and stop any existing container using port 80
             if [ $(docker ps -q --filter "publish=80" | wc -l) -gt 0 ]; then
               docker stop $(docker ps -q --filter "publish=80")
@@ -70,4 +72,3 @@ jobs:
             
             # Restart Nginx to apply the new certificates
             sudo systemctl restart nginx
-
