@@ -45,6 +45,8 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # Ensure the script runs using Bash shell
+          shell: bash
           script: |
             # Navigate to the project directory containing the docker-compose.yml file
             cd ${{ secrets.PROJECT_PATH }}
