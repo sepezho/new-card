@@ -1,8 +1,9 @@
-# Use a lightweight web server image, such as Nginx
+# Use a lightweight Nginx base image
 FROM nginx:alpine
 
-# Copy static files to Nginx's default static folder
+# Copy static site content to the Nginx HTML folder
 COPY . /usr/share/nginx/html
 
-# Expose port 80
+# Expose port 80 for HTTP traffic
 EXPOSE 80
+

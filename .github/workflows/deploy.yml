@@ -1,14 +1,9 @@
-# .github/workflows/deploy.yml
-
 name: CI/CD Pipeline
 
 on:
   push:
     branches:
       - main  # Trigger workflow on push to the main branch
-  pull_request:
-    branches:
-      - main
 
 jobs:
   build-and-deploy:
@@ -19,18 +14,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Set up Docker Buildx for multi-platform builds (optional but recommended)
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      # Step 3: Log in to Docker Hub
+      # Step 2: Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 4: Build and push the Docker image
+      # Step 3: Build and push the Docker image to Docker Hub
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
@@ -38,6 +29,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/card:latest
 
+      # Step 4: Deploy to remote server
       - name: Deploy to remote server
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -45,33 +37,14 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            bash -c "
-            # Navigate to the project directory containing the docker-compose.yml file
             cd ${{ secrets.PROJECT_PATH }}
-            
-            # Stop and remove existing container using Docker
-            #if [ \$(docker ps -aq -f name=my-static-site | wc -l) -gt 0 ]; then
-            #  docker stop my-static-site
-            #  docker rm my-static-site
-            #fi
-            #
-            ## Identify and stop any existing container using port 80
-            #if [ \$(docker ps -q --filter 'publish=80' | wc -l) -gt 0 ]; then
-            #  docker stop \$(docker ps -q --filter 'publish=80')
-            #  docker rm \$(docker ps -q --filter 'publish=80')
-            #fi
-            #
-            #docker ps 
-            # Pull the latest Docker image
-            docker pull ${{ secrets.DOCKER_USERNAME }}/card:latest
-            
-            sudo lsof -i :80
-            # Run the new container
-            docker run -d --name card -p 80:80 ${{ secrets.DOCKER_USERNAME }}/card:latest
-            
-            # Obtain or renew SSL certificates with Certbot (without www)
-            sudo certbot --nginx -d ${{ secrets.DOMAIN }} --non-interactive --agree-tos --email ${{ secrets.MAIL }}
-            
-            # Restart Nginx to apply the new certificates
-            sudo systemctl restart nginx
-            "
+
+            # Pull the latest image from Docker Hub
+            docker-compose pull
+
+            # Pass the LETSENCRYPT_EMAIL as an environment variable and rebuild the containers
+            LETSENCRYPT_EMAIL=${{ secrets.LETSENCRYPT_EMAIL }} docker-compose up -d --build
+
+            # Clean up unused Docker images
+            docker system prune -f
+
