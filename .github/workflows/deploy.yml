@@ -36,7 +36,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/my-static-site:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/card:latest
 
       - name: Deploy to remote server
         uses: appleboy/ssh-action@v0.1.6
@@ -50,24 +50,24 @@ jobs:
             cd ${{ secrets.PROJECT_PATH }}
             
             # Stop and remove existing container using Docker
-            if [ \$(docker ps -aq -f name=my-static-site | wc -l) -gt 0 ]; then
-              docker stop my-static-site
-              docker rm my-static-site
-            fi
-            
-            # Identify and stop any existing container using port 80
-            if [ \$(docker ps -q --filter 'publish=80' | wc -l) -gt 0 ]; then
-              docker stop \$(docker ps -q --filter 'publish=80')
-              docker rm \$(docker ps -q --filter 'publish=80')
-            fi
-            
-            docker ps 
+            #if [ \$(docker ps -aq -f name=my-static-site | wc -l) -gt 0 ]; then
+            #  docker stop my-static-site
+            #  docker rm my-static-site
+            #fi
+            #
+            ## Identify and stop any existing container using port 80
+            #if [ \$(docker ps -q --filter 'publish=80' | wc -l) -gt 0 ]; then
+            #  docker stop \$(docker ps -q --filter 'publish=80')
+            #  docker rm \$(docker ps -q --filter 'publish=80')
+            #fi
+            #
+            #docker ps 
             # Pull the latest Docker image
-            docker pull ${{ secrets.DOCKER_USERNAME }}/my-static-site:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/card:latest
             
             sudo lsof -i :80
             # Run the new container
-            docker run -d --name my-static-site -p 80:80 ${{ secrets.DOCKER_USERNAME }}/my-static-site:latest
+            docker run -d --name card -p 80:80 ${{ secrets.DOCKER_USERNAME }}/card:latest
             
             # Obtain or renew SSL certificates with Certbot (without www)
             sudo certbot --nginx -d ${{ secrets.DOMAIN }} --non-interactive --agree-tos --email ${{ secrets.MAIL }}
