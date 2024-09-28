@@ -39,9 +39,8 @@ jobs:
           script: |
             cd ${{ secrets.PROJECT_PATH }}
 
-            # Pull the latest image from Docker Hub
-            docker-compose pull
-
+            docker pull ${{ secrets.DOCKER_USERNAME }}/card:latest
+            
             # Pass the LETSENCRYPT_EMAIL as an environment variable and rebuild the containers
             LETSENCRYPT_EMAIL=${{ secrets.LETSENCRYPT_EMAIL }} docker-compose up -d --build
 
